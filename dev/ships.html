@@ -1,0 +1,22 @@
+<!doctype html><html><body style="margin:0;background:#070B24"><canvas id="c" style="width:1200px;height:600px;display:block"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { makeShip, makeEnvironment, makeNebula } from '/src/game/models.js';
+import { glowTexture } from '/src/game/textures.js';
+import { SHIPS } from '/src/game/config.js';
+const c = document.getElementById('c');
+const R = new THREE.WebGLRenderer({ canvas: c, antialias: true }); R.setSize(1200, 600, false);
+R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.05;
+const scene = new THREE.Scene(); scene.environment = makeEnvironment(R);
+const cam = new THREE.OrthographicCamera(-300, 300, 150, -150, -3000, 3000); cam.position.z = 1000; scene.add(cam);
+const bg = makeNebula(); bg.position.z = -2500; bg.scale.set(700, 360, 1); cam.add(bg);
+const sun = new THREE.DirectionalLight(0xfff0dd, 2.4); sun.position.set(-0.6, 0.75, 1); scene.add(sun);
+scene.add(new THREE.AmbientLight(0x6878ff, 0.3));
+const tex = glowTexture();
+const tilt = Number(new URLSearchParams(location.search).get('tilt') || 0);
+SHIPS.forEach((s, i) => { const g = makeShip(s.id, s.color, tex); g.scale.multiplyScalar(1.25);
+  g.position.set(i % 2 ? 140 : -140, i < 2 ? 70 : -70, 0); g.rotation.x = tilt;
+  const u = g.userData; u.fo.scale.set(68, 30, 1); u.fo.position.x = u.tailX - 15; u.fc.scale.set(37, 18, 1); u.light.intensity = 1400;
+  scene.add(g); });
+R.render(scene, cam);
+</script></body></html>
